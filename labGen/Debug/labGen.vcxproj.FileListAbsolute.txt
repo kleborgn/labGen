@@ -1,0 +1,2 @@
+C:\Users\Kilian\source\repos\labGen\labGen\Debug\labGen.exe
+C:\Users\Kilian\source\repos\labGen\labGen\Debug\labGen.pdb

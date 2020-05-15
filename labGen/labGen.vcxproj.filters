@@ -38,6 +38,7 @@
     <ClInclude Include="imgui\stb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="ColorPicker.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

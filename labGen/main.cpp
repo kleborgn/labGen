@@ -1,10 +1,11 @@
-#include <imgui.h>
+#include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx11.h"
 #include <d3d11.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <tchar.h>
 #include "maze.cpp"
+#include "ColorPicker.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -107,15 +108,15 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int main(int, char**)
 {
     // Create application window
-    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL, _T("ImGui Example"), NULL };
+    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL, _T("LabGen"), NULL };
     RegisterClassEx(&wc);
-    HWND hwnd = CreateWindow(_T("ImGui Example"), _T("ImGui DirectX11 Example"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = CreateWindow(_T("LabGen"), _T("LabGen"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (CreateDeviceD3D(hwnd) < 0)
     {
         CleanupDeviceD3D();
-        UnregisterClass(_T("ImGui Example"), wc.hInstance);
+        UnregisterClass(_T("LabGen"), wc.hInstance);
         return 1;
     }
 
@@ -136,13 +137,16 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../extra_fonts/ProggyTiny.ttf", 10.0f);
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 
-    bool show_test_window = true;
-    bool show_another_window = false;
+    bool show_test_window = false;
+    bool show_generator = false;
+    bool show_color_picker = false;
     bool generate = false;
     bool draw = false;
     int m = 10, n = 10;
     Maze maze(m, n);
     ImVec4 clear_col = ImColor(114, 144, 154);
+    float thickness = 1.0f;
+    float sz = 15.0f;
 
     // Main loop
     MSG msg;
@@ -160,30 +164,48 @@ int main(int, char**)
         // 1. Show a simple window
         // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
         {
-            static float f = 0.0f;
-            ImGui::Text("Hello, world!");
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_col);
+            ImGui::Text("Parametres :");
+
+            ImGui::SliderInt("Colonnes", &m, 1, 100);
+            ImGui::SliderInt("Lignes", &n, 1, 100);
+            ImGui::Spacing();
+
+            if (ImGui::Button("Changer la couleur")) show_color_picker ^= 1;
+            ImGui::Spacing();
+
+            ImGui::SliderFloat("Epaisseur", &thickness, 1.0f, 10.0f);
+            ImGui::SliderFloat("Espacement", &sz, 10.0f, 100.0f);
+            ImGui::Spacing();
+
             //if (ImGui::Button("Test Window")) show_test_window ^= 1;
-            if (ImGui::Button("Another Window")) show_another_window ^= 1;
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            if (ImGui::Button("Ouvrir le rendu")) show_generator ^= 1;
+
+            ImGui::Spacing();
+            ImGui::Text("Framerate : %.1f FPS)", ImGui::GetIO().Framerate);
         }
 
-        // 2. Show another simple window, this time using an explicit Begin/End pair
-        if (show_another_window)
+        if (show_color_picker) {
+            ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiSetCond_FirstUseEver);
+            ImGui::Begin("Couleur", &show_color_picker);
+            ColorPicker("", (float*)&clear_col);
+            ImGui::End();
+        }
+
+        // 2. Show main window
+        if (show_generator)
         {
             ImGui::SetNextWindowSize(ImVec2(200,100), ImGuiSetCond_FirstUseEver);
-            ImGui::Begin("Another Window", &show_another_window);
+            ImGui::Begin("Labyrinthe", &show_generator);
             ImGui::Text("Hello");
             if (ImGui::Button("Generate")) generate ^= 1;
             if (generate) {
-                maze.reset();
-                maze.generate();
+                maze.resetAndResize(m, n);
+                maze.algo2();
                 draw = true;
                 generate = !generate;
             }
             if (draw)
-                maze.draw();
+                maze.draw(clear_col, thickness, sz);
             // --------------------------------------------------------
        
             // --------------------------------------------------------
@@ -205,7 +227,7 @@ int main(int, char**)
 
     ImGui_ImplDX11_Shutdown();
     CleanupDeviceD3D();
-    UnregisterClass(_T("ImGui Example"), wc.hInstance);
+    UnregisterClass(_T("LabGen"), wc.hInstance);
 
     return 0;
 }

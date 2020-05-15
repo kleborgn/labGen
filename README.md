@@ -13,3 +13,6 @@ A faire :
 - Résoudre le problème de certaines cases qui sont fermées
 - Faire un mode debug pour afficher la génération étape par étape
 - Réorganiser le code
+- Mode pour résoudre le labyrinthe généré
+- Système de seed pour la génération
+- Exporter les labyrinthes

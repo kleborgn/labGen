@@ -3,6 +3,8 @@ Un générateur de labyrinthe par méthode de fusion aléatoire de chemins. Powe
 
 (le code est sale)
 
+![Image du logiciel](https://raw.githubusercontent.com/kleborgn/labGen/master/Capture.PNG)
+
 Pour l'instant :
 - Interface graphique (DirectX11 + ImGui)
   -> Choix de la couleur, taille, épaisseur du trait, espacement des murs
